@@ -1,0 +1,13 @@
+<launch>
+
+	<!--launching the turtlebo3_house from turtlebot_gazebo package-->>
+	<include file="$(find turtlebot3_gazebo)/launch/turtlebot3_house.launch"/>
+	    <!--Launching the rviz node-->> 
+	    <node pkg="rviz" type="rviz" name="rviz"/>
+	    <!--Launching robot_state_publisher node-->>
+	    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+	<!--Launching turtlebot3_teleop node-->>
+	<include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch"/>
+
+
+</launch>
