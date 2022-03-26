@@ -37,4 +37,30 @@ roslaunch mapping_nafees_mahmuda octomap.launch
 ```
 rosrun mapping_nafees_mahmuda laser_scan_to_point_cloud_node.py
 ```
+&nbsp;
 
+**Output - Occupancy Grid Map**
+
+<img src = "media/OccupancyGridMap.png" width= "500" >
+
+&nbsp;
+
+**Output - Octomap Server**
+
+<img src = "media/OctomapRviz.png" width= "500" >
+
+
+&nbsp;
+
+**Output - Octomap in Octoviz**
+
+The following images are produced through Octoviz. To generate the map in octoviz, we have used the given commands in the lab pdf.
+
+<p float = "left" >
+  <img src = "media/octoviz.png" width= "500" >
+  <img src = "media/octovizF.png" width= "500" >
+</p>
+
+
+<h2 align="center">Thank You</h2>
+&nbsp;
