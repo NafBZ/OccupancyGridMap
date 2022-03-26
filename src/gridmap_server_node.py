@@ -14,7 +14,7 @@ class GridmapServer:
 
         self.world_frame_id = world_frame_id
         self.occ_grid_pub = rospy.Publisher(
-            "occupancy_grid", OccupancyGrid, queue_size=10)
+            "OccupancyGridMap", OccupancyGrid, queue_size=10)
         self.scan_sub = rospy.Subscriber(
             scan_topic, LaserScan, self.get_scan, queue_size=10)
         self.tfBuffer = tf2_ros.Buffer()
@@ -22,10 +22,15 @@ class GridmapServer:
         self.gridmap = None
         self.cell_size = cell_size
         self.pub_timer = rospy.Timer(rospy.Duration(0.2), self.publish_gridmap)
-        print('Occupancy Grid Map server running')
 
     def get_scan(self, scan):
+        # ------------   IMPORTANT!!!  -------------------
+        # If your computer is not fast enough to process
+        # all the laser scans, you can process
+        # only one scan out of 5 or 10.
+        # -------------------------------------------------
         try:
+
             # Get transform from laser_frame_id to world_frame_id
             trans = self.tfBuffer.lookup_transform(
                 self.world_frame_id, scan.header.frame_id, rospy.Time())
@@ -33,6 +38,7 @@ class GridmapServer:
                                                                   trans.transform.rotation.y,
                                                                   trans.transform.rotation.z,
                                                                   trans.transform.rotation.w])
+
             # Initialize gridmap object with the first measure
             if self.gridmap is None:
                 self.gridmap = GridMap(center=(
@@ -45,7 +51,7 @@ class GridmapServer:
                 # If the laser range is in the range of the sensor apply the update
                 if r >= scan.range_min and r <= scan.range_max:
                     # Define the diferent angles of the laser beam according to the specs of the scanner
-                    yaw_ray = yaw + scan.angle_min + i*scan.angle_increment
+                    yaw_ray = (yaw + scan.angle_min) + (i*scan.angle_increment)
                     self.gridmap.add_ray((x, y), yaw_ray, r, 0.7)
 
             # self.publish_gridmap()
@@ -55,18 +61,20 @@ class GridmapServer:
 
     def publish_gridmap(self, event=None):
 
-        # Reshaping and scaling the grid map to be able to publish as nav_msgs/OccupancyGrid
-        gridmap_img = (self.gridmap.get_map().reshape((1, -1))[0] + 6.91)*7.23
+        # Reshape and scale the Gridmap
+        reshaped_gridmap = (
+            self.gridmap.get_map().reshape((1, -1))[0] + 6.91)*7.23
 
-        # Cells that have not been yet explored are set to -1
-        for index, i in enumerate(gridmap_img):
-            if i == 6.91*7.23:
-                gridmap_img[index] = -1
+        # Unexplored cells are set to negative 1
+        for index, key in enumerate(reshaped_gridmap):
+            if key == 6.91*7.23:
+                reshaped_gridmap[index] = -1
 
         # Definning the occupancy grid map message
         occ_grid = OccupancyGrid()
         occ_grid.header.frame_id = self.world_frame_id
         occ_grid.header.stamp = rospy.Time()
+        # resolution means the size of each cell
         occ_grid.info.resolution = self.cell_size
         occ_grid.info.width = int(self.gridmap.map_width[0]/self.cell_size)
         occ_grid.info.height = int(self.gridmap.map_width[1]/self.cell_size)
@@ -77,13 +85,14 @@ class GridmapServer:
         occ_grid.info.origin.orientation.y = 0
         occ_grid.info.origin.orientation.z = 0
         occ_grid.info.origin.orientation.w = 1
-        occ_grid.data = gridmap_img.astype(dtype=np.int8)
+        occ_grid.data = reshaped_gridmap.astype(dtype=np.int8)
 
         # Publishing the message
         self.occ_grid_pub.publish(occ_grid)
 
 
 if __name__ == '__main__':
-    rospy.init_node('gridmap_test')
-    node = GridmapServer('/scan', 'odom', 0.1)
+    rospy.init_node('gridmap_server_node')
+    node = GridmapServer(scan_topic='/scan',
+                         world_frame_id='odom', cell_size=0.1)
     rospy.spin()
