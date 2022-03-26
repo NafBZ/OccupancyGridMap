@@ -57,8 +57,8 @@ rosrun mapping_nafees_mahmuda laser_scan_to_point_cloud_node.py
 The following images are produced through Octoviz. To generate the map in octoviz, we have used the given commands in the lab pdf.
 
 <p float = "left" >
-  <img src = "media/octoviz.png" width= "500" >
-  <img src = "media/octovizF.png" width= "500" >
+  <img src = "media/octoviz.png" width= "300" >
+  <img src = "media/octovizF.png" width= "300" >
 </p>
 
 
