@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import numpy as np
-from bresenham import *
+from .bresenham import *
 
 
 def log_ods(p): return np.log(p/(1-p))
@@ -24,7 +24,7 @@ class GridMap:
 
     def update_cell(self, position, p):
 
-        for i in range(len(position)-1):
+        for i in range(0, len(position)-1):
             self.grid[position[i][1]][position[i][0]] = np.clip(
                 self.grid[position[i][1]][position[i][0]] + log_ods(1-p), self.LMIN, self.LMAX)
 
@@ -41,7 +41,6 @@ class GridMap:
         x1 = start[0] + range*np.cos(angle)
         y1 = start[1] + range*np.sin(angle)
 
-        # Converting the start [i0,j0] and end [i1,j1] positions in cells
         start_x, start_y = self.position_to_cell([x_not, y_not])
         end_x, end_y = self.position_to_cell([x1, y1])
         bres_start = [int(start_x), int(start_y)]
@@ -52,9 +51,6 @@ class GridMap:
         return self.grid
 
     def position_to_cell(self, position):
-        # Transform a position with respecto to the fixed_frame to a
-        # cell index (rows and cols in the grid map)
-
         row_position = ((position[0]-self.origin[0])/self.cell_size)
         col_position = ((position[1]-self.origin[1])/self.cell_size)
 

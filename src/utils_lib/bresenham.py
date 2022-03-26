@@ -1,94 +1,223 @@
-#!/usr/bin/python3
+# #!/usr/bin/python3
 
-# def bresenham(x0, y0, x1, y1):
-#     """Yield integer coordinates on the line from (x0, y0) to (x1, y1).
-#     Input coordinates should be integers.
-#     The result will contain both the start and the end point.
-#     """
-#     dx = x1 - x0
-#     dy = y1 - y0
+# def bresenham(start, end):
 
-#     xsign = 1 if dx > 0 else -1
-#     ysign = 1 if dy > 0 else -1
+#     dx = end[0] - start[0]
+#     dy = end[1] - start[1]
+
+#     x_sign = 1 if dx > 0 else -1
+#     y_sign = 1 if dy > 0 else -1
 
 #     dx = abs(dx)
 #     dy = abs(dy)
 
 #     if dx > dy:
-#         xx, xy, yx, yy = xsign, 0, 0, ysign
+#         x_x = x_sign
+#         x_y = 0
+#         y_x = 0
+#         y_y = y_sign
 #     else:
-#         dx, dy = dy, dx
-#         xx, xy, yx, yy = 0, ysign, xsign, 0
+#         dx = dy
+#         dy = dx
+#         x_x = 0
+#         x_y = y_sign
+#         y_x = x_sign
+#         y_y = 0
 
 #     D = 2*dy - dx
 #     y = 0
 
 #     for x in range(dx + 1):
-#         yield x0 + x*xx + y*yx, y0 + x*xy + y*yy
+#         yield start[0] + x*x_x + y*y_x, start[1] + x*x_y + y*y_y
 #         if D >= 0:
 #             y += 1
 #             D -= 2*dx
 #         D += 2*dy
 
 
-#!/usr/bin/python3
-
-def line_high(start, end, width, points):
-    dx = end[0]-start[0]
-    dy = end[1]-start[1]
-    xi = width
-    if dx < 0:
-        xi = -width
-        dx = -dx
-    D = (2*dx) - dy
-    x = start[0]
-
-    for y in range(start[1], end[1]+width):
-        points.append([x, y])
-        if D > 0:
-            x = x + xi
-            D = D + (2*(dx-dy))
-        else:
-            D = D + (2*dx)
-    return points
+import rospy
 
 
-def line_low(start, end, width, points):
-    dx = end[0]-start[0]
-    dy = end[1]-start[1]
-    yi = width
-    if dy < 0:
-        yi = -width
-        dy = -dy
-    D = (2*dy) - dy
-    y = start[1]
+def bresenham_line(start, end, width):
+    start = [int(start[0]/width), int(start[1]/width)]
+    end = [int(end[0]/width), int(end[1]/width)]
 
-    for x in range(start[0], end[0]+width):
-        points.append([x, y])
-        if D > 0:
-            y = y + yi
-            D = D + (2*(dy-dx))
-        else:
-            D = D + (2*dy)
-    return points
-
-
-def bresenham_line(start, end, width=1):
-    # start:  2D lists
-    # end:    2D lists
-    # width:  scalar with resolution of grid map
-    # points: list of 2D points from start to end
-    points = []
     if abs(end[1]-start[1]) < abs(end[0]-start[0]):
-
         if start[0] > end[0]:
-            line_low(end, start, width, points)
+            return bresenhamLow(end, start, width)[::-1]
         else:
-            line_low(start, end, width, points)
+            return bresenhamLow(start, end, width)
+
     else:
         if start[1] > end[1]:
-            line_high(end, width, start)
+            return bresenhamHigh(end, start, width)[::-1]
+
         else:
-            line_high(start, width, end)
+            return bresenhamHigh(start, end, width)
+
+
+def bresenhamLow(start, end, width):
+
+    dx = end[0]-start[0]
+    dy = end[1]-start[1]
+
+    yi = 1
+    if dy < 0:
+        yi = -1
+        dy = -dy
+
+    D = 2*dy-dx
+
+    x = start[0]
+    y = start[1]
+
+    points = []
+    while x <= end[0]:
+        points.append([x*width, y*width])
+        # map[y,x]=1
+        if D > 0:
+            y += yi
+            D += 2*(dy-dx)
+        else:
+            D += 2*dy
+
+        x += 1
+
+    return points
+
+
+def bresenhamHigh(start, end, width):
+
+    dx = end[0]-start[0]
+    dy = end[1]-start[1]
+
+    xi = 1
+    if dx < 0:
+        xi = -1
+        dx = -dx
+
+    D = 2*dx-dy
+
+    x = start[0]
+    y = start[1]
+
+    points = []
+    while y <= end[1]:
+        points.append([x*width, y*width])
+        if D > 0:
+            x += xi
+            D += 2*(dx-dy)
+        else:
+            D += 2*dx
+
+        y += 1
+
+    return points
+
+
+# def bresenhamHigh(start, end, width):
+
+#     dx= end[0]-start[0]
+#     dy=end[1]-start[1]
+
+
+#     xi=1
+#     if dx<0:
+#         xi=-1
+#         xy=-xy
+
+#     D=2*dx-dy
+
+#     x=start[0]
+#     y=start[1]
+
+#     points=[]
+#     while y<=end[1]:
+#         points.append([x*width,y*width])
+
+#         if D>0:
+#             x+=xi
+#             D+=2*(dx-dy)
+#         else:
+#             D+=2*dx
+
+#         y+=1
+
+
+#     return points
+
+def bresenham_line(start, end, width):
+    start = [int(start[0]/width), int(start[1]/width)]
+    end = [int(end[0]/width), int(end[1]/width)]
+
+    if abs(end[1]-start[1]) < abs(end[0]-start[0]):
+        if start[0] > end[0]:
+            return bresenhamLow(end, start, width)[::-1]
+        else:
+            return bresenhamLow(start, end, width)
+
+    else:
+        if start[1] > end[1]:
+            return bresenhamHigh(end, start, width)[::-1]
+
+        else:
+            return bresenhamHigh(start, end, width)
+
+
+def bresenhamLow(start, end, width):
+
+    dx = end[0]-start[0]
+    dy = end[1]-start[1]
+
+    yi = 1
+    if dy < 0:
+        yi = -1
+        dy = -dy
+
+    D = 2*dy-dx
+
+    x = start[0]
+    y = start[1]
+
+    points = []
+    while x <= end[0]:
+        points.append([x*width, y*width])
+        # map[y,x]=1
+        if D > 0:
+            y += yi
+            D += 2*(dy-dx)
+        else:
+            D += 2*dy
+
+        x += 1
+
+    return points
+
+
+def bresenhamHigh(start, end, width):
+
+    dx = end[0]-start[0]
+    dy = end[1]-start[1]
+
+    xi = 1
+    if dx < 0:
+        xi = -1
+        dx = -dx
+
+    D = 2*dx-dy
+
+    x = start[0]
+    y = start[1]
+
+    points = []
+    while y <= end[1]:
+        points.append([x*width, y*width])
+        if D > 0:
+            x += xi
+            D += 2*(dx-dy)
+        else:
+            D += 2*dx
+
+        y += 1
 
     return points
