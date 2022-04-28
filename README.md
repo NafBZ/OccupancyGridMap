@@ -1,12 +1,4 @@
-# Hands on Planning
-## Lab 1 - Occupancy Grid Map using Bresenham Algorithm
-&nbsp;
-
-**Group Members:**
-
-- Nafees Bin Zaman: u1977526
-- Mahmuda Rawnak Jahan: u1977525
-&nbsp;
+# Occupancy Grid Map using Bresenham Algorithm
 
 To visualize the simulation environment in Gazebo and Rviz, please execute the turtlebot3.launch file. To execute the launch file, please copy and paste the following command given in the code snippet into the terminal.
 &nbsp;
